@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" InitialTargets="EnsureWixToolsetInstalled" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>3.10</ProductVersion>
+    <ProjectGuid>64306a0c-0613-4c50-934d-932fc5abe71c</ProjectGuid>
+    <SchemaVersion>2.0</SchemaVersion>
+    <OutputName>SetupProject</OutputName>
+    <OutputType>Package</OutputType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Debug</DefineConstants>
+    <SuppressIces>ICE30</SuppressIces>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <SuppressIces>ICE30</SuppressIces>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="WiXToolsetNetCoreService.wxs" />
+    <Compile Include="Product.wxs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WiXToolsetNetCoreService\WiXToolsetNetCoreService.csproj">
+      <Name>WiXToolsetNetCoreService</Name>
+      <Project>{69101a41-4301-43e7-b3e8-a4bf501cc9a1}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />
+  <Target Name="EnsureWixToolsetInstalled" Condition=" '$(WixTargetsImported)' != 'true' ">
+    <Error Text="The WiX Toolset v3.11 (or newer) build tools must be installed to build this project. To download the WiX Toolset, see http://wixtoolset.org/releases/" />
+  </Target>
+  <!-- Adding Heat copying -->
+  <Target Name="BeforeBuild">
+    <Exec Command="dotnet publish ..\WiXToolsetNetCoreService\WiXToolsetNetCoreService.csproj -c $(Configuration) -r win10-x64" />
+    <PropertyGroup>
+      <LinkerBaseInputPaths>..\WiXToolsetNetCoreService\bin\$(Configuration)\netcoreapp2.2\win10-x64\publish</LinkerBaseInputPaths>
+      <DefineConstants>BasePath=..\WiXToolsetNetCoreService\bin\$(Configuration)\netcoreapp2.2\win10-x64\publish</DefineConstants>
+    </PropertyGroup>
+    <HeatDirectory OutputFile="WiXToolsetNetCoreService.wxs" DirectoryRefId="INSTALLFOLDER" ComponentGroupName="WiXToolsetNetCoreServiceProject" SuppressCom="true" Directory="..\WiXToolsetNetCoreService\bin\$(Configuration)\netcoreapp2.2\win10-x64\publish" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="false" GenerateGuidsNow="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.BasePath" />
+  </Target>
+</Project>

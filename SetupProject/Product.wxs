@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="*" Name="SetupProject" Language="1033" Version="1.0.0.0" Manufacturer="Some Company" UpgradeCode="5ea50add-a63d-4950-b013-5b74d39a8e44">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+		<MediaTemplate />
+
+		<Feature Id="ProductFeature" Title="SetupProject" Level="1">
+      <!-- heat references -->
+      <ComponentGroupRef Id="WiXToolsetNetCoreServiceProject" />
+			<ComponentGroupRef Id="ProductComponents" />
+		</Feature>
+	</Product>
+
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="INSTALLFOLDER" Name="WiXToolsetNetCoreService" />
+			</Directory>
+		</Directory>
+	</Fragment>
+
+	<Fragment>
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+
+      <!-- service registration -->
+      <Component Id="ProductComponent" >
+        <File Id="JobServiceEXE"
+              Name="WiXToolsetNetCoreService.exe"
+              DiskId="1"
+              Source="$(var.WiXToolsetNetCoreService.TargetDir)\WiXToolsetNetCoreService.exe"
+              Vital="yes"
+              KeyPath="yes" />
+
+        <ServiceInstall Id="ServiceInstaller"
+                        Type="ownProcess"
+                        Vital="yes"
+                        Name="WiXToolsetNetCoreService"
+                        DisplayName="WiX Toolset .NET Core Service"
+                        Description="Example for installing .NET Core service with WiX toolset"
+                        Start="auto"
+                        Account="LocalSystem"
+                        ErrorControl="normal" />
+
+        <ServiceControl Id="StartService"
+                        Name="WiXToolsetNetCoreService"
+                        Start="install"
+                        Wait="no" />
+        <ServiceControl Id="StopService"
+                        Name="WiXToolsetNetCoreService"
+                        Stop="uninstall"
+                        Remove="uninstall"
+                        Wait="yes" />
+      </Component>
+
+		</ComponentGroup>
+	</Fragment>
+</Wix>
